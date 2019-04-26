@@ -19,7 +19,7 @@ let Maze = [
 let imageAdress = 'https://raw.githubusercontent.com/szendy1/pac-man-mp/master/img/';
 let cWidth = 640;
 let cHeight = 384;
-
+let g = Game;
 
 class Canvas extends React.Component {
   componentDidMount() {
@@ -56,8 +56,8 @@ class Canvas extends React.Component {
         }
         //ctx.strokeText(Maze[i].charAt(j), x+16, y+16);
     }
-    let g = new Game();
-    g.preLoad();
+    canvas.onclick = function(){doSth()};
+    
   }
   render() {
     return(
@@ -66,6 +66,11 @@ class Canvas extends React.Component {
       </div>
     )
   }
+}
+
+function doSth(){
+  this.g.preLoad();
+  console.log("sss")
 }
 
 static function drawImage(ctx,x,y,src){
@@ -87,12 +92,11 @@ class Game{
     };
   }
   preLoad(){
-    let cas = document.getElementById('canvas')
-    console.log(cas)
-      let ctx = cas.getContext('2d');
-      ctx.fillStyle = "white";
-    //ctx.fillText(100,100,"sdawdawdawdawdawdawdawdawdadawda");
-   // ctx.stroke()
+    let canvas = document.getElementById('canvas')
+    let ctx = canvas.getContext('2d');
+    ctx.fillStyle = "green";
+    ctx.fillText(100,100,"sdawdawdawdawdawdawdawdawdadawda");
+    ctx.stroke()
   }
 }
 
