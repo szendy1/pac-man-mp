@@ -16,7 +16,7 @@ let Maze = [
   '02110111111111101120',
   '00000000000000000000',
 ]
-
+let imageAdress = 'https://raw.githubusercontent.com/szendy1/pac-man-mp/master/img/';
 let cWidth = 640;
 let cHeight = 384;
 
@@ -34,9 +34,14 @@ class Canvas extends React.Component {
         switch (Maze[i].charAt(j)){
           case '0':
             ctx.fillRect(x,y,31,31);
+            break;
           case 'P':
-          let img = new Image();
-           ctx.drawImage(img,x,y);
+            let img = new Image();
+            img.src = imageAdress+'pac_man_0.png';
+            img.onload = function(){
+            ctx.drawImage(img,x,y);
+            }
+            break;
           }
         }
         //ctx.strokeText(Maze[i].charAt(j), x+16, y+16);
