@@ -9,7 +9,7 @@ let Maze = [
   '01110100000000101110',
   '01000111111111100010',
   '011111100EE001111110',
-  '00000100GGGG00100000',
+  '00000100EEGE00100000',
   '01111110000001111110',
   '010001111P1111100010',
   '01011100000000111010',
@@ -36,11 +36,20 @@ class Canvas extends React.Component {
             ctx.fillRect(x,y,31,31);
             break;
           case 'P':
-            let img = new Image();
+            drawImage(ctx,x,y,'pac_man_0.png');
+            /*let img = new Image();
             img.src = imageAdress+'pac_man_0.png';
             img.onload = function(){
             ctx.drawImage(img,x,y);
-            }
+            }*/
+            break;
+          case 'G':
+            drawImage(ctx,x,y,'spr_ghost_orange_0.png');
+            /*let img1 = new Image();
+            img1.src = imageAdress+'spr_ghost_orange_0.png';
+            img1.onload = function(){
+            ctx.drawImage(img1,x,y);
+            }*/
             break;
           }
         }
@@ -56,6 +65,12 @@ class Canvas extends React.Component {
       </div>
     )
   }
+}
+
+static function drawImage(ctx,x,y,src){
+  let img = new Image();
+  img.src = imageAdress+src;
+  ctx.drawImage(img,x,y);
 }
 
 class Game{
