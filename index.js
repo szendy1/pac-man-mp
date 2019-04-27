@@ -19,48 +19,24 @@ let Maze = [
 let imageAdress = 'https://raw.githubusercontent.com/szendy1/pac-man-mp/master/img/';
 let cWidth = 640;
 let cHeight = 384;
-let g = Game;
+let tile = 32;
+let gameData = {
+  ctx: null,
+  gameStarted: false,
+  gamePaused: false,
+
+};
+
 
 class Canvas extends React.Component {
   componentDidMount() {
     const canvas = document.getElementById('canvas')
-    const ctx = canvas.getContext("2d")
-    ctx.fillStyle = "#FF0000";
-    ctx.fillRect(0,0,640,448);
-    ctx.fillStyle = "blue";
-    for (let i = 0; i< Maze.length;i++){
-      for (let j = 0; j<Maze[i].length;j++){
-          let x = 32*j;
-          let y = 32*i;
-        switch (Maze[i].charAt(j)){
-          case '0':
-            ctx.fillRect(x,y,31,31);
-            break;
-          case 'P':
-            drawImage(ctx,x,y,'pac_man_0.png');
-            /*let img = new Image();
-            img.src = imageAdress+'pac_man_0.png';
-            img.onload = function(){
-            ctx.drawImage(img,x,y);
-            }*/
-            break;
-          case 'G':
-            drawImage(ctx,x,y,'spr_ghost_orange_0.png');
-            /*let img1 = new Image();
-            img1.src = imageAdress+'spr_ghost_orange_0.png';
-            img1.onload = function(){
-            ctx.drawImage(img1,x,y);
-            }*/
-            break;
-          }
-        }
-        //ctx.strokeText(Maze[i].charAt(j), x+16, y+16);
-    }
-    canvas.onclick = function(){doSth()};
-    
+    gameData.ctx = canvas.getContext("2d")
+    initGame();
+    canvas.onclick = function () { pauseGame() };
   }
   render() {
-    return(
+    return (
       <div>
         <canvas id="canvas" width={cWidth} height={cHeight} />
       </div>
@@ -68,64 +44,94 @@ class Canvas extends React.Component {
   }
 }
 
-function doSth(){
-  this.g.preLoad();
-  console.log("sss")
+function initGame() {
+  gameData.ctx.fillStyle = "#FF0000";
+  gameData.ctx.fillRect(0, 0, 640, 448);
+  gameData.ctx.fillStyle = "blue";
+  for (let i = 0; i < Maze.length; i++) {
+    for (let j = 0; j < Maze[i].length; j++) {
+      let x = tile * j;
+      let y = tile * i;
+      switch (Maze[i].charAt(j)) {
+        case '0':
+          gameData.ctx.fillRect(x, y, tile, tile);
+          break;
+        case 'P':
+          drawImage(x, y, 'pac_man_0.png');
+          break;
+        case 'G':
+          drawImage(x, y, 'spr_ghost_orange_0.png');
+          break;
+      }
+    }
+  }
 }
 
-static function drawImage(ctx,x,y,src){
+function pauseGame() {
+  if (gameData.gameStarted) {
+    pause();
+  }
+  else {
+    startGame();
+  }
+}
+
+static function drawImage(x, y, src) {
   let img = new Image();
-  img.src = imageAdress+src;
-  ctx.drawImage(img,x,y);
+  img.src = imageAdress + src;
+  gameData.ctx.drawImage(img, x, y);
 }
 
-class Game{
-  constructor(){
-     let state = {
-      lives : 3,
-      pac : Pacman(),
-      ghost : Ghost(),
-      map : Maze,
-      pacTiles : [
-        
+function pause() {
+
+}
+function startGame() {
+
+}
+
+class Game {
+  constructor() {
+    let state = {
+      lives: 3,
+      pac: Pacman(),
+      ghost: Ghost(),
+      map: Maze,
+      pacTiles: [
+
       ],
     };
   }
-  preLoad(){
-    let canvas = document.getElementById('canvas')
-    let ctx = canvas.getContext('2d');
-    ctx.fillStyle = "green";
-    ctx.fillText(100,100,"sdawdawdawdawdawdawdawdawdadawda");
-    ctx.stroke()
+  preLoad() {
+
   }
 }
 
 
 // object constructors
 function Pacman() {
-    let row= 0;   // row
-    let col= 0;   // col
-    let phase= 0;   // animation phase
-    //this.pn= 0;  // next delta for p (+1 or -1)
-    let dir= 0; // the directions we could go
-    let nextDir= 0;  // the current moving direction
-    let dx= 0;  // delta value for x-movement
-    let dy= 0;  // delta value for y-movement
-    let osx=0;  // x-offset for smooth animation
-    let osy=0;  // y-offset for smooth animation
+  let row = 0;   // row
+  let col = 0;   // col
+  let phase = 0;   // animation phase
+  //this.pn= 0;  // next delta for p (+1 or -1)
+  let dir = 0; // the directions we could go
+  let nextDir = 0;  // the current moving direction
+  let dx = 0;  // delta value for x-movement
+  let dy = 0;  // delta value for y-movement
+  let osx = 0;  // x-offset for smooth animation
+  let osy = 0;  // y-offset for smooth animation
 }
 
 function Ghost() {
-    let row= 0;   // row
-    let col= 0;   // col
-    let phase= 0;   // animation phase
-    //this.pn= 0;  // next delta for p (+1 or -1)
-    let dir= 0; // the directions we could go
-    let nextDir= 0;  // the current moving direction
-    let dx= 0;  // delta value for x-movement
-    let dy= 0;  // delta value for y-movement
-    let osx=0;  // x-offset for smooth animation
-    let osy=0;  // y-offset for smooth animation
+  let row = 0;   // row
+  let col = 0;   // col
+  let phase = 0;   // animation phase
+  //this.pn= 0;  // next delta for p (+1 or -1)
+  let dir = 0; // the directions we could go
+  let nextDir = 0;  // the current moving direction
+  let dx = 0;  // delta value for x-movement
+  let dy = 0;  // delta value for y-movement
+  let osx = 0;  // x-offset for smooth animation
+  let osy = 0;  // y-offset for smooth animation
 }
 
 
