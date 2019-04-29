@@ -21,6 +21,20 @@ let imageAdress = 'https://raw.githubusercontent.com/szendy1/pac-man-mp/master/i
 let tile = 32;
 let cWidth = tile * Maze[0].length;
 let cHeight = tile * Maze.length;
+let dirs = [
+  [0, 1],
+  [1, 0],
+  [0, -1],
+  [-1, 0],
+];
+let tiles = {
+  pTiles: [],
+  gTiles: [],
+  pDeathTiles: [],
+  lifeTile: null,
+  pillTile: null,
+  powerPillTile: null,
+}
 let gameData = {
   canvas: null,
   ctx: null,
@@ -32,6 +46,7 @@ let gameData = {
   timer: null,
   pillMaze: null,
   gameReversed: false,
+  lives: 0,
 
 };
 
@@ -82,47 +97,36 @@ class Canvas extends React.Component {
 
 function move() {
   checkCollisions();
-  changeDir(gameData.pacman);
-  changeDir(gameData.ghost);
+  let p = gameData.pacman;
+  let g = gameData.ghost
+  changeDir(p);
+  changeDir(g);
+  if (canMove(p)) {
+    p.row += dirs[p.dir][0];
+    p.col += dirs[p.dir][1];
+  }
+  repaintCanvas();
 
+}
 
+function repaintCanvas() {
+  
 }
 
 function changeDir(fig) {
   if (figureInMiddle(fig) && fig.dir != fig.nextDir) {
-    if (!canMove(fig)) {
+    if (!canMove(fig) ||
+      Maze[fig.row + dirs[fig.nextDir][0]][fig.col + dirs[fig.nextDir][1]] != 0) {
       fig.dir = fig.nextDir;
-    }
-    else {
-      switch (fig.nextDir) {
-        case 0:
-          if (Maze[fig.row][fig.col + 1] != 0) {
-            fig.dir = fig.nextDir;
-          }
-          break;
-        case 1:
-          if (Maze[fig.col + 1][fig.row] != 0) {
-            fig.dir = fig.nextDir;
-          }
-          break;
-        case 2:
-          if (Maze[fig.col][fig.row - 1] != 0) {
-            fig.dir = fig.nextDir;
-          }
-          break;
-        case 3:
-          if (Maze[fig.col - 1][fig.row] != 0) {
-            fig.dir = fig.nextDir;
-          }
-          break;
-      }
     }
   }
 }
 
-function canMove(fig){
-  
-
+function canMove(fig) {
+  if (Maze[fig.row + dirs[fig.dir][0]][fig.col + dirs[fig.dir][1]] != 0) {
+    return true;
+  }
+  return false;
 }
 
 function checkCollisions() {
@@ -179,6 +183,7 @@ function resetPositions(p, g) {//pacman, ghost
 function initGame() {
   initVariables();
   initCanvas();
+  console.log("Game Initialized");
 }
 
 function initVariables() {
@@ -191,6 +196,31 @@ function initVariables() {
   gameData.score = 0;
   gameData.gamePaused = false;
   gameData.gameStarted = false;
+  
+  initTiles();
+}
+
+function initTiles(){
+  for (let i = 0; i < 4; i++) {//pacmanTiles
+    tiles.pTiles.push(new Image());
+    tiles.pTiles[i].src = imageAdress + 'pac_man_' + i + '.png';
+  }
+  for (let i = 0; i < 2; i++) {//ghostTiles
+    tiles.gTiles.push(new Image());
+    tiles.gTiles[i].src = imageAdress + 'spr_ghost_orange_' + i + '.png';
+  }
+  for (let i = 0; i < 3; i++) {//pacmanDeathTiles
+    tiles.pDeathTiles.push(new Image());
+    tiles.pDeathTiles[i].src = imageAdress + 'spr_pacdeath_' + i + '.png';
+  }
+  tiles.lifeTile = new Image();
+  tiles.lifeTile.src = imageAdress + 'spr_lifecounter_0.png';
+  
+  tiles.pillTile = new Image();
+  tiles.pillTile.src = imageAdress + 'spr_pill_0.png';
+
+  tiles.powerPillTile = new Image();
+  tiles.powerPillTile.src = imageAdress + 'spr_power_pill_0.png';
 
 }
 
@@ -205,22 +235,27 @@ function initCanvas() {
       switch (Maze[i].charAt(j)) {
         case '0':
           gameData.ctx.fillRect(x, y, tile, tile);
+          gameData.pillMaze[i][j] = 0;
           break;
         case '1':
-          drawImage(x + 12, y + 12, 'spr_pill_0.png');
+          //drawImage(x + 12, y + 12, 'spr_pill_0.png');
+          gameData.ctx.drawImage(tiles.pillTile, x + 12, y + 12);
           gameData.pillMaze[i][j] = 1;
           break;
         case '2':
-          drawImage(x + 8, y + 8, 'spr_power_pill_0.png');
+          //drawImage(x + 8, y + 8, 'spr_power_pill_0.png');
+          gameData.ctx.drawImage(tiles.powerPillTile, x+8, y+8);
           gameData.pillMaze[i][j] = 2;
           break;
         case 'P':
-          drawImage(x, y, 'pac_man_0.png');
+          //drawImage(x, y, 'pac_man_0.png');
+          gameData.ctx.drawImage(tiles.pTiles[0], x, y);
           gameData.pacman.dCol = j;
           gameData.pacman.dRow = i;
           break;
         case 'G':
-          drawImage(x, y, 'spr_ghost_orange_0.png');
+          //drawImage(x, y, 'spr_ghost_orange_0.png');
+          gameData.ctx.drawImage(tiles.gTiles[0], x, y);
           gameData.pacman.dCol = j;
           gameData.pacman.dRow = i;
           break;
