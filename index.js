@@ -70,7 +70,7 @@ class Canvas extends React.Component {
 }
 
 document.addEventListener('keydown', function (event) {
-    console.log(event.which);
+  console.log(event.which);
   if (gameData.gameStarted && !gameData.gamePaused) {
     console.log(event.which);
     switch (event.which) {
@@ -129,8 +129,14 @@ function repaintCanvas() {
     }
   }
   gameData.ctx.drawImage(tiles.pTiles[0], gameData.pacman.col * tile, gameData.pacman.row * tile);
-
-  gameData.ctx.drawImage(tiles.gTiles[0], gameData.ghost.col * tile, gameData.ghost.row * tile);
+  let t;
+  if (gameData.gameReversed) {
+    t = tiles.gReversedTiles;
+  }
+  else {
+    t = tiles.gTiles;
+  }
+  gameData.ctx.drawImage(t[0], gameData.ghost.col * tile, gameData.ghost.row * tile);
 
   paintScore();
   paintLives();
@@ -178,7 +184,7 @@ function checkCollisions() {
     else {
       pacmanDying();
       resetPositions(true, true);
-      gameData.lives-=1;
+      gameData.lives -= 1;
     }
     //gameData.gamePaused = true;
   }
@@ -274,6 +280,10 @@ function initTiles() {
   for (let i = 0; i < 3; i++) {//pacmanDeathTiles
     tiles.pDeathTiles.push(new Image());
     tiles.pDeathTiles[i].src = imageAdress + 'spr_pacdeath_' + i + '.png';
+  }
+  for (let i = 0; i < 2; i++) {//ghostTiles
+    tiles.gReversedTiles.push(new Image());
+    tiles.gReversedTiles[i].src = imageAdress + 'spr_afraid_' + i + '.png';
   }
   tiles.lifeTile = new Image();
   tiles.lifeTile.src = imageAdress + 'spr_lifecounter_0.png';
