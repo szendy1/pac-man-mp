@@ -17,9 +17,10 @@ let Maze = [
   '00000000000000000000',
 ]
 let imageAdress = 'https://raw.githubusercontent.com/szendy1/pac-man-mp/master/img/';
-let cWidth = 640;
-let cHeight = 384;
+
 let tile = 32;
+let cWidth = tile * Maze[0].length;
+let cHeight = tile * Maze.length;
 let gameData = {
   canvas: null,
   ctx: null,
@@ -45,16 +46,28 @@ class Canvas extends React.Component {
   }
 
   handleKey(e) {
-    switch (e.keyCode) {
-      case 37: console.log("Left"); break; //Left key
-      case 38: console.log("Up"); break; //Up key
-      case 39: console.log("Right"); break; //Right key
-      case 40: console.log("Down"); break; //Down key
-      case 65: console.log("A"); break; //A key
-      case 87: console.log("W"); break;
-      case 68: break; //D key
-      case 83: break; //S key
-      default: console.log(e.keyCode);
+    if (gameData.gameStarted && !gameData.gamePaused) {
+      switch (e.keyCode) {
+        case 37: console.log("Left"); break; //Left key
+        case 38: console.log("Up"); break; //Up key
+        case 39: console.log("Right"); break; //Right key
+        case 40: console.log("Down"); break; //Down key
+        case 65: console.log("A"); break; //A key
+        case 87: console.log("W"); break;
+        case 68: break; //D key
+        case 83: break; //S key
+        default: console.log(e.keyCode);
+        /*
+              case 37: gameData.pacman.nextDir = 2; break; //Left key
+              case 38: gameData.pacman.nextDir = 3; break; //Up key
+              case 39: gameData.pacman.nextDir = 0; break; //Right key
+              case 40: gameData.pacman.nextDir = 1; break; //Down key
+              case 65: gameData.ghost.nextDir = 2; break; //A key
+              case 87: gameData.ghost.nextDir = 3; break; //W key
+              case 68: gameData.ghost.nextDir = 0; break; //D key
+              case 83: gameData.ghost.nextDir = 1; break; //S key
+              */
+      }
     }
   }
 
@@ -69,7 +82,47 @@ class Canvas extends React.Component {
 
 function move() {
   checkCollisions();
+  changeDir(gameData.pacman);
+  changeDir(gameData.ghost);
+
+
+}
+
+function changeDir(fig) {
+  if (figureInMiddle(fig) && fig.dir != fig.nextDir) {
+    if (!canMove(fig)) {
+      fig.dir = fig.nextDir;
+    }
+    else {
+      switch (fig.nextDir) {
+        case 0:
+          if (Maze[fig.row][fig.col + 1] != 0) {
+            fig.dir = fig.nextDir;
+          }
+          break;
+        case 1:
+          if (Maze[fig.col + 1][fig.row] != 0) {
+            fig.dir = fig.nextDir;
+          }
+          break;
+        case 2:
+          if (Maze[fig.col][fig.row - 1] != 0) {
+            fig.dir = fig.nextDir;
+          }
+          break;
+        case 3:
+          if (Maze[fig.col - 1][fig.row] != 0) {
+            fig.dir = fig.nextDir;
+          }
+          break;
+      }
+    }
+  }
+}
+
+function canMove(fig){
   
+
 }
 
 function checkCollisions() {
@@ -135,12 +188,15 @@ function initVariables() {
   for (let i = 0; i < Maze.length; i++) {
     gameData.pillMaze[i] = new Array(Maze[i].length);
   }
+  gameData.score = 0;
+  gameData.gamePaused = false;
+  gameData.gameStarted = false;
 
 }
 
 function initCanvas() {
   gameData.ctx.fillStyle = 'black'//"#FF0000";
-  gameData.ctx.fillRect(0, 0, 640, 448);
+  gameData.ctx.fillRect(0, 0, cWidth, cHeight);
   gameData.ctx.fillStyle = "blue";
   for (let i = 0; i < Maze.length; i++) {
     for (let j = 0; j < Maze[i].length; j++) {
@@ -171,6 +227,7 @@ function initCanvas() {
       }
     }
   }
+
 }
 
 function pauseGame() {
@@ -201,7 +258,7 @@ function Figure() {
   let dCol = 0;
   let phase = 0;   // animation phase
   let dir = 0; // the directions we could go
-  let nextDir = 0;  // the current moving direction
+  let nextDir = -1;  // the current moving direction
   let dx = 0;  // delta value for x-movement
   let dy = 0;  // delta value for y-movement
   let osx = 0;  // x-offset for smooth animation
