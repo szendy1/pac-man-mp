@@ -70,9 +70,7 @@ class Canvas extends React.Component {
 }
 
 document.addEventListener('keydown', function (event) {
-  console.log(event.which);
   if (gameData.gameStarted && !gameData.gamePaused) {
-    console.log(event.which);
     switch (event.which) {
       case 37: gameData.pacman.nextDir = 2; break; //Left key
       case 38: gameData.pacman.nextDir = 3; break; //Up key
