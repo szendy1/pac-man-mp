@@ -30,6 +30,7 @@ let dirs = [
 let tiles = {
   pTiles: [],
   gTiles: [],
+  gReversedTiles: [],
   pDeathTiles: [],
   lifeTile: null,
   pillTile: null,
@@ -70,7 +71,7 @@ class Canvas extends React.Component {
 
 document.addEventListener('keydown', function (event) {
   if (gameData.gameStarted && !gameData.gamePaused) {
-    switch (event.which) { 
+    switch (event.which) {
       case 37: gameData.pacman.nextDir = 2; break; //Left key
       case 38: gameData.pacman.nextDir = 3; break; //Up key
       case 39: gameData.pacman.nextDir = 0; break; //Right key
@@ -84,7 +85,6 @@ document.addEventListener('keydown', function (event) {
 });
 
 function move() {
-  checkCollisions();
   let p = gameData.pacman;
   let g = gameData.ghost
   changeDir(p);
@@ -93,7 +93,16 @@ function move() {
     p.row += dirs[p.dir][0];
     p.col += dirs[p.dir][1];
   }
+  if (canMove(g)) {
+    g.row += dirs[g.dir][0];
+    g.col += dirs[g.dir][1];
+  }
+  if (gameData.gameReversed && new Date() - gameData.timer > 20000) {
+    gameData.gameReversed = !gameData.gameReversed;
+  }
+  checkCollisions();
   repaintCanvas();
+
 }
 
 function repaintCanvas() {
@@ -159,8 +168,8 @@ function canMove(fig) {
 }
 
 function checkCollisions() {
-  if (gameData.pacman.row == gameData.ghost.row && gameData.pillMaze.col == gameData.ghost.col) {//simple check
-    if (gameReversed) {
+  if (isCollision(gameData.pacman.row * tile, gameData.pacman.col * tile, gameData.ghost.row * tile, gameData.ghost.col * tile, 30)) {
+    if (gameData.gameReversed) {
       gameData.score += 100;
       resetPositions(false, true);
     }
@@ -168,7 +177,7 @@ function checkCollisions() {
       pacmanDying();
       resetPositions(true, true);
     }
-    gamePaused = true;
+    gameData.gamePaused = true;
   }
   if (figureInMiddle(gameData.pacman)) {
     let i = gameData.pacman.row;
@@ -177,6 +186,9 @@ function checkCollisions() {
       case 1:
         gameData.pillMaze[i][j] = null;
         gameData.score += 10;
+        if (allPillsEaten()) {
+          pauseGame();
+        }
         break;
       case 2:
         gameData.pillMaze[i][j] = null;
@@ -184,9 +196,22 @@ function checkCollisions() {
         gameData.timer = new Date();
         break;
     }
-
   }
+}
 
+function allPillsEaten() {
+  for (let i = 0; i < gameData.pillMaze.length; i++) {
+    for (let j = 0; j < gameData.pillMaze[i].length; j++) {
+      if (gameData.pillMaze[i][j] == 1) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+function isCollision(x1, y1, x2, y2, radius) {
+  return (Math.abs(x1 - x2) + Math.abs(y1 - y2) < radius);
 }
 
 function figureInMiddle(fig) {
