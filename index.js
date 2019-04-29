@@ -279,7 +279,7 @@ function initTiles() {
     tiles.pDeathTiles.push(new Image());
     tiles.pDeathTiles[i].src = imageAdress + 'spr_pacdeath_' + i + '.png';
   }
-  for (let i = 0; i < 2; i++) {//ghostTiles
+  for (let i = 0; i < 2; i++) {//ghostAfraidTiles
     tiles.gReversedTiles.push(new Image());
     tiles.gReversedTiles[i].src = imageAdress + 'spr_afraid_' + i + '.png';
   }
