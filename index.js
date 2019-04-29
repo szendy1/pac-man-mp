@@ -57,35 +57,7 @@ class Canvas extends React.Component {
     gameData.ctx = canvas.getContext("2d")
     initGame();
     canvas.onclick = function () { pauseGame(); };
-    //canvas.addEventListener('keydown', this.handleKey, false);
   }
-
-  /*handleKey(e) {
-    console.log("blablabla")
-    if (gameData.gameStarted && !gameData.gamePaused) {
-      switch (e.keyCode) {
-        case 37: console.log("Left"); break; //Left key
-        case 38: console.log("Up"); break; //Up key
-        case 39: console.log("Right"); break; //Right key
-        case 40: console.log("Down"); break; //Down key
-        case 65: console.log("A"); break; //A key
-        case 87: console.log("W"); break;
-        case 68: break; //D key
-        case 83: break; //S key
-        default: console.log(e.keyCode);
-        /*
-              case 37: gameData.pacman.nextDir = 2; break; //Left key
-              case 38: gameData.pacman.nextDir = 3; break; //Up key
-              case 39: gameData.pacman.nextDir = 0; break; //Right key
-              case 40: gameData.pacman.nextDir = 1; break; //Down key
-              case 65: gameData.ghost.nextDir = 2; break; //A key
-              case 87: gameData.ghost.nextDir = 3; break; //W key
-              case 68: gameData.ghost.nextDir = 0; break; //D key
-              case 83: gameData.ghost.nextDir = 1; break; //S key
-              /
-      }
-    }
-  }*/
 
   render() {
     return (
