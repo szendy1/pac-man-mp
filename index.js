@@ -57,10 +57,11 @@ class Canvas extends React.Component {
     gameData.ctx = canvas.getContext("2d")
     initGame();
     canvas.onclick = function () { pauseGame(); };
-    canvas.addEventListener('keydown', this.handleKey, false);
+    //canvas.addEventListener('keydown', this.handleKey, false);
   }
 
-  handleKey(e) {
+  /*handleKey(e) {
+    console.log("blablabla")
     if (gameData.gameStarted && !gameData.gamePaused) {
       switch (e.keyCode) {
         case 37: console.log("Left"); break; //Left key
@@ -81,19 +82,34 @@ class Canvas extends React.Component {
               case 87: gameData.ghost.nextDir = 3; break; //W key
               case 68: gameData.ghost.nextDir = 0; break; //D key
               case 83: gameData.ghost.nextDir = 1; break; //S key
-              */
+              /
       }
     }
-  }
+  }*/
 
   render() {
     return (
       <div>
-        <canvas id="canvas" onKeyDown={this.handleKey} width={cWidth} height={cHeight} />
+        <canvas id="canvas" width={cWidth} height={cHeight} />
       </div>
     )
   }
 }
+
+document.addEventListener('keydown', function (event) {
+  if (gameData.gameStarted && !gameData.gamePaused) {
+    switch (event.which) { 
+      case 37: gameData.pacman.nextDir = 2; break; //Left key
+      case 38: gameData.pacman.nextDir = 3; break; //Up key
+      case 39: gameData.pacman.nextDir = 0; break; //Right key
+      case 40: gameData.pacman.nextDir = 1; break; //Down key
+      case 65: gameData.ghost.nextDir = 2; break; //A key
+      case 87: gameData.ghost.nextDir = 3; break; //W key
+      case 68: gameData.ghost.nextDir = 0; break; //D key
+      case 83: gameData.ghost.nextDir = 1; break; //S key
+    }
+  }
+});
 
 function move() {
   checkCollisions();
@@ -138,24 +154,24 @@ function repaintCanvas() {
 }
 
 function paintScore() {
-  gameData.ctx.font = tile+"px Comic Sans MS";
+  gameData.ctx.font = tile + "px Comic Sans MS";
   gameData.ctx.fillStyle = "white";
   gameData.ctx.fillText("Score: " + gameData.score, 48, 28);
 }
 
 function paintLives() {
-  gameData.ctx.font = tile+"px Comic Sans MS";
+  gameData.ctx.font = tile + "px Comic Sans MS";
   gameData.ctx.fillStyle = "white";
-  gameData.ctx.fillText("Lives: " , 48, cHeight-4);
+  gameData.ctx.fillText("Lives: ", 48, cHeight - 4);
 
-  for (let i=0; i<gameData.lives; i++){
-    gameData.ctx.drawImage(tiles.lifeTile, 150 + i*20, cHeight-24);
+  for (let i = 0; i < gameData.lives; i++) {
+    gameData.ctx.drawImage(tiles.lifeTile, 150 + i * 20, cHeight - 24);
   }
 }
 
 function changeDir(fig) {
   if (figureInMiddle(fig) && fig.dir != fig.nextDir) {
-    if (fig.nextDir!= -1 && !canMove(fig) || fig.nextDir!= -1 &&
+    if (fig.nextDir != -1 && !canMove(fig) || fig.nextDir != -1 &&
       Maze[fig.row + dirs[fig.nextDir][0]][fig.col + dirs[fig.nextDir][1]] != 0) {
       fig.dir = fig.nextDir;
     }
