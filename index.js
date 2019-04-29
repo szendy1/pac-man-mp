@@ -21,29 +21,40 @@ let cWidth = 640;
 let cHeight = 384;
 let tile = 32;
 let gameData = {
+  canvas: null,
   ctx: null,
   gameStarted: false,
   gamePaused: false,
   pacman: null,
   ghost: null,
+  score: 0,
+  timer: null,
+  pillMaze: null,
+  gameReversed: false,
+
 };
 
 
 class Canvas extends React.Component {
   componentDidMount() {
-    const canvas = document.getElementById('canvas')
+    gameData.canvas = document.getElementById('canvas')
     gameData.ctx = canvas.getContext("2d")
     initGame();
     canvas.onclick = function () { pauseGame(); };
     canvas.addEventListener('keydown', this.handleKey, false);
   }
-  
-  handleKey(e){
+
+  handleKey(e) {
     switch (e.keyCode) {
-        case 37: alert("Left"); break; //Left key
-        case 38: alert("Up"); break; //Up key
-        case 39: alert("Right"); break; //Right key
-        case 40: alert("Down"); break; //Down key
+      case 37: console.log("Left"); break; //Left key
+      case 38: console.log("Up"); break; //Up key
+      case 39: console.log("Right"); break; //Right key
+      case 40: console.log("Down"); break; //Down key
+      case 65: console.log("A"); break; //A key
+      case 87: console.log("W"); break;
+      case 68: break; //D key
+      case 83: break; //S key
+      default: console.log(e.keyCode);
     }
   }
 
@@ -56,7 +67,61 @@ class Canvas extends React.Component {
   }
 }
 
+function move() {
+  checkCollisions();
+  
+}
 
+function checkCollisions() {
+  if (gameData.pacman.row == gameData.ghost.row && gameData.pillMaze.col == gameData.ghost.col) {//simple check
+    if (gameReversed) {
+      gameData.score += 100;
+      resetPositions(false, true);
+    }
+    else {
+      pacmanDying();
+      resetPositions(true, true);
+    }
+    gamePaused = true;
+  }
+  if (figureInMiddle(gameData.pacman)) {
+    let i = gameData.pacman.row;
+    let j = gameData.pacman.col;
+    switch (gameData.pillMaze[i][j]) {
+      case 1:
+        gameData.pillMaze[i][j] = null;
+        gameData.score += 10;
+        break;
+      case 2:
+        gameData.pillMaze[i][j] = null;
+        gameData.gameReversed = true;
+        gameData.timer = new Date();
+        break;
+    }
+
+  }
+
+}
+
+function figureInMiddle(fig) {
+  if (fig.row % 1 == 0 && fig.col % 1 == 0)
+    return true;
+}
+
+function pacmanDying() {
+  //do animation
+}
+
+function resetPositions(p, g) {//pacman, ghost
+  if (p) {
+    gameData.pacman.row = gameData.pacman.dRow;
+    gameData.pacman.col = gameData.pacman.dCol;
+  }
+  if (g) {
+    gameData.ghost.row = gameData.ghost.dRow;
+    gameData.ghost.col = gameData.ghost.dCol;
+  }
+}
 
 function initGame() {
   initVariables();
@@ -66,6 +131,10 @@ function initGame() {
 function initVariables() {
   gameData.pacman = new Figure();
   gameData.ghost = new Figure();
+  gameData.pillMaze = new Array(Maze.length);
+  for (let i = 0; i < Maze.length; i++) {
+    gameData.pillMaze[i] = new Array(Maze[i].length);
+  }
 
 }
 
@@ -83,19 +152,21 @@ function initCanvas() {
           break;
         case '1':
           drawImage(x + 12, y + 12, 'spr_pill_0.png');
+          gameData.pillMaze[i][j] = 1;
           break;
         case '2':
           drawImage(x + 8, y + 8, 'spr_power_pill_0.png');
+          gameData.pillMaze[i][j] = 2;
           break;
         case 'P':
           drawImage(x, y, 'pac_man_0.png');
-          gameData.pacman.col = j;
-          gameData.pacman.row = i;
+          gameData.pacman.dCol = j;
+          gameData.pacman.dRow = i;
           break;
         case 'G':
           drawImage(x, y, 'spr_ghost_orange_0.png');
-          gameData.pacman.col = j;
-          gameData.pacman.row = i;
+          gameData.pacman.dCol = j;
+          gameData.pacman.dRow = i;
           break;
       }
     }
@@ -104,7 +175,7 @@ function initCanvas() {
 
 function pauseGame() {
   if (gameData.gameStarted) {
-    pause();
+    gameData.gamePaused = !gameData.gamePaused;
   }
   else {
     startGame();
@@ -117,20 +188,18 @@ static function drawImage(x, y, src) {
   gameData.ctx.drawImage(img, x, y);
 }
 
-function pause() {
-
-}
 function startGame() {
-
+  gameData.gameStarted = true;
+  console.log("Game started");
 }
-
 
 // object constructor
 function Figure() {
   let row = 0;   // row
   let col = 0;   // col
+  let dRow = 0;
+  let dCol = 0;
   let phase = 0;   // animation phase
-  //this.pn= 0;  // next delta for p (+1 or -1)
   let dir = 0; // the directions we could go
   let nextDir = 0;  // the current moving direction
   let dx = 0;  // delta value for x-movement
