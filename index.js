@@ -70,7 +70,9 @@ class Canvas extends React.Component {
 }
 
 document.addEventListener('keydown', function (event) {
+    console.log(event.which);
   if (gameData.gameStarted && !gameData.gamePaused) {
+    console.log(event.which);
     switch (event.which) {
       case 37: gameData.pacman.nextDir = 2; break; //Left key
       case 38: gameData.pacman.nextDir = 3; break; //Up key
@@ -160,7 +162,6 @@ function changeDir(fig) {
 }
 
 function canMove(fig) {
-  console.log(fig);
   if (Maze[fig.row + dirs[fig.dir][0]][fig.col + dirs[fig.dir][1]] != 0) {
     return true;
   }
@@ -171,13 +172,15 @@ function checkCollisions() {
   if (isCollision(gameData.pacman.row * tile, gameData.pacman.col * tile, gameData.ghost.row * tile, gameData.ghost.col * tile, 30)) {
     if (gameData.gameReversed) {
       gameData.score += 100;
+      gameData.gameReversed = false;
       resetPositions(false, true);
     }
     else {
       pacmanDying();
       resetPositions(true, true);
+      gameData.lives-=1;
     }
-    gameData.gamePaused = true;
+    //gameData.gamePaused = true;
   }
   if (figureInMiddle(gameData.pacman)) {
     let i = gameData.pacman.row;
@@ -227,10 +230,14 @@ function resetPositions(p, g) {//pacman, ghost
   if (p) {
     gameData.pacman.row = gameData.pacman.dRow;
     gameData.pacman.col = gameData.pacman.dCol;
+    gameData.pacman.dir = 0;
+    gameData.pacman.nextDir = 0;
   }
   if (g) {
     gameData.ghost.row = gameData.ghost.dRow;
     gameData.ghost.col = gameData.ghost.dCol;
+    gameData.ghost.dir = 0;
+    gameData.ghost.nextDir = 0;
   }
 }
 
@@ -320,7 +327,7 @@ function initCanvas() {
 function pauseGame() {
   move()
   if (gameData.gameStarted) {
-    gameData.gamePaused = !gameData.gamePaused;
+    //gameData.gamePaused = !gameData.gamePaused;
   }
   else {
     startGame();
