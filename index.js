@@ -177,11 +177,12 @@ function checkCollisions() {
     if (gameData.gameReversed) {
       gameData.score += 100;
       gameData.gameReversed = false;
-      resetPositions(false, true);
+      resetFigure(gameData.ghost);
     }
     else {
       pacmanDying();
-      resetPositions(true, true);
+      resetFigure(gameData.pacman);
+      resetFigure(gameData.ghost);
       gameData.lives -= 1;
     }
     //gameData.gamePaused = true;
@@ -230,25 +231,19 @@ function pacmanDying() {
   //do animation
 }
 
-function resetPositions(p, g) {//pacman, ghost
-  if (p) {
-    gameData.pacman.row = gameData.pacman.dRow;
-    gameData.pacman.col = gameData.pacman.dCol;
-    gameData.pacman.dir = 0;
-    gameData.pacman.nextDir = 0;
-  }
-  if (g) {
-    gameData.ghost.row = gameData.ghost.dRow;
-    gameData.ghost.col = gameData.ghost.dCol;
-    gameData.ghost.dir = 0;
-    gameData.ghost.nextDir = 0;
-  }
+function resetFigure(fig) {
+  fig.row = fig.dRow;
+  fig.col = fig.dCol;
+  fig.dir = 0;
+  fig.nextDir = -1;
+  fig.phase = 0;
 }
 
 function initGame() {
   initVariables();
   initCanvas();
-  resetPositions(true, true);
+  resetFigure(gameData.pacman);
+  resetFigure(gameData.ghost);
   console.log("Game Initialized");
 }
 
