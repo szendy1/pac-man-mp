@@ -102,7 +102,16 @@ function move() {
   }
   checkCollisions();
   repaintCanvas();
+  paintPauseScreen();
+}
 
+function paintPauseScreen(){
+  gameData.ctx.fillStyle = 'black'//"#FF0000";
+  gameData.ctx.fillRect(0, 0, cWidth, cHeight);
+  gameData.ctx.font = tile + "px Comic Sans MS";
+  gameData.ctx.fillStyle = "white";
+  gameData.ctx.fillText("Game Paused", cWidth/2-50, cHeight/2-25);
+  gameData.ctx.fillText("Click to play !", cWidth/2-55, cHeight/2+25);
 }
 
 function repaintCanvas() {
