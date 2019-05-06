@@ -17,7 +17,9 @@ let Maze = [
   '00000000000000000000',
 ]
 let imageAdress = 'https://raw.githubusercontent.com/szendy1/pac-man-mp/master/img/';
-
+let pacTimer;
+let aSpeed = 400;
+let aStep = 4;
 let tile = 32;
 let cWidth = tile * Maze[0].length;
 let cHeight = tile * Maze.length;
@@ -85,24 +87,37 @@ document.addEventListener('keydown', function (event) {
 });
 
 function move() {
+  if (pacTimer) clearTimeout(pacTimer);
+  let dateA = new Date();
   let p = gameData.pacman;
   let g = gameData.ghost
   changeDir(p);
   changeDir(g);
-  if (canMove(p)) {
-    p.row += dirs[p.dir][0];
-    p.col += dirs[p.dir][1];
+  if (!figureInMiddle(p) || canMove(p)) {
+    p.row += dirs[p.dir][0]/aStep;
+    p.col += dirs[p.dir][1]/aStep;
+    if (p.phase==3) p.pn=-1;
+    if (p.phase==1) p.pn=1;
+    p.phase += p.pn;
   }
-  if (canMove(g)) {
-    g.row += dirs[g.dir][0];
-    g.col += dirs[g.dir][1];
+  if (!figureInMiddle(g) || canMove(g)) {
+    g.row += dirs[g.dir][0]/aStep;
+    g.col += dirs[g.dir][1]/aStep;
+    g.phase += 1;
   }
   if (gameData.gameReversed && new Date() - gameData.timer > 20000) {
     gameData.gameReversed = !gameData.gameReversed;
   }
   checkCollisions();
   repaintCanvas();
-  paintPauseScreen();
+  if (gameData.gameStarted && !gameData.gamePaused) {
+        var dateB=new Date();
+        var mTO= dateA.getTime()-dateB.getTime();
+        mTO+=Math.round(aSpeed/aStep);
+        if (mTO<5) mTO=5; // minimum delay 5 msecs
+        // set up the timout and store a reference in pacTimer
+        pacTimer= setTimeout(move,mTO);
+    }
 }
 
 function paintPauseScreen(){
@@ -110,8 +125,8 @@ function paintPauseScreen(){
   gameData.ctx.fillRect(0, 0, cWidth, cHeight);
   gameData.ctx.font = tile + "px Comic Sans MS";
   gameData.ctx.fillStyle = "white";
-  gameData.ctx.fillText("Game Paused", cWidth/2-50, cHeight/2-25);
-  gameData.ctx.fillText("Click to play !", cWidth/2-55, cHeight/2+25);
+  gameData.ctx.fillText("Game Paused", cWidth/2-100, cHeight/2-25);
+  gameData.ctx.fillText("Click to play !", cWidth/2-105, cHeight/2+25);
 }
 
 function repaintCanvas() {
@@ -135,7 +150,7 @@ function repaintCanvas() {
       }
     }
   }
-  gameData.ctx.drawImage(tiles.pTiles[0], gameData.pacman.col * tile, gameData.pacman.row * tile);
+  gameData.ctx.drawImage(tiles.pTiles[gameData.pacman.phase], gameData.pacman.col * tile, gameData.pacman.row * tile);
   let t;
   if (gameData.gameReversed) {
     t = tiles.gReversedTiles;
@@ -143,7 +158,7 @@ function repaintCanvas() {
   else {
     t = tiles.gTiles;
   }
-  gameData.ctx.drawImage(t[0], gameData.ghost.col * tile, gameData.ghost.row * tile);
+  gameData.ctx.drawImage(t[gameData.ghost.phase%2], gameData.ghost.col * tile, gameData.ghost.row * tile);
 
   paintScore();
   paintLives();
@@ -194,7 +209,8 @@ function checkCollisions() {
       resetFigure(gameData.ghost);
       gameData.lives -= 1;
     }
-    //gameData.gamePaused = true;
+    gameData.gamePaused = true;
+    if (pacTimer) clearTimeout(pacTimer);
   }
   if (figureInMiddle(gameData.pacman)) {
     let i = gameData.pacman.row;
@@ -245,7 +261,7 @@ function resetFigure(fig) {
   fig.col = fig.dCol;
   fig.dir = 0;
   fig.nextDir = -1;
-  fig.phase = 0;
+  fig.phase = 2;
 }
 
 function initGame() {
@@ -337,12 +353,21 @@ function initCanvas() {
 }
 
 function pauseGame() {
-  move()
   if (gameData.gameStarted) {
-    //gameData.gamePaused = !gameData.gamePaused;
+
+    if (pacTimer) clearTimeout(pacTimer);
+    gameData.gamePaused = !gameData.gamePaused;
+    if (gameData.gamePaused){
+      paintPauseScreen();
+    }
+    else{
+      repaintCanvas();
+      move();
+    }
   }
   else {
     startGame();
+    move();
   }
 }
 
@@ -357,7 +382,8 @@ function Figure() {
   this.col = 0;   // col
   this.dRow = 0;
   this.dCol = 0;
-  this.phase = 0;   // animation phase
+  this.phase = 2;   // animation phase
+  this.pn = 1;
   this.dir = 0; // the directions we could go
   this.nextDir = -1;  // the current moving direction
   this.dx = 0;  // delta value for x-movement
