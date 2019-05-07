@@ -108,8 +108,9 @@ function move() {
   if (gameData.gameReversed && new Date() - gameData.timer > 20000) {
     gameData.gameReversed = !gameData.gameReversed;
   }
-  checkCollisions();
-  repaintCanvas();
+  if (!checkCollisions()){
+    repaintCanvas();
+  }
   if (gameData.gameStarted && !gameData.gamePaused) {
         var dateB=new Date();
         var mTO= dateA.getTime()-dateB.getTime();
@@ -218,6 +219,7 @@ function checkCollisions() {
       gameData.score += 100;
       gameData.gameReversed = false;
       resetFigure(gameData.ghost);
+
     }
     else {
       pacmanDying();
@@ -225,8 +227,9 @@ function checkCollisions() {
       resetFigure(gameData.ghost);
       gameData.lives -= 1;
     }
-    gameData.gamePaused = true;
+    pauseGame();
     if (pacTimer) clearTimeout(pacTimer);
+    return true;
   }
   if (figureInMiddle(gameData.pacman)) {
     let i = gameData.pacman.row;
@@ -246,6 +249,7 @@ function checkCollisions() {
         break;
     }
   }
+  return false;
 }
 
 function allPillsEaten() {
@@ -384,12 +388,12 @@ function pauseGame() {
   }
   else {
     startGame();
-    move();
   }
 }
 
 function startGame() {
   gameData.gameStarted = true;
+  move();
   console.log("Game started");
 }
 
