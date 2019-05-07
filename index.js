@@ -96,9 +96,9 @@ function move() {
   if (!figureInMiddle(p) || canMove(p)) {
     p.row += dirs[p.dir][0]/aStep;
     p.col += dirs[p.dir][1]/aStep;
-    if (p.phase==3) p.pn=-1;
-    if (p.phase==1) p.pn=1;
     p.phase += p.pn;
+    if (p.phase==3) p.pn=-1;
+    if (p.phase==0) p.pn=1;
   }
   if (!figureInMiddle(g) || canMove(g)) {
     g.row += dirs[g.dir][0]/aStep;
@@ -150,7 +150,8 @@ function repaintCanvas() {
       }
     }
   }
-  gameData.ctx.drawImage(tiles.pTiles[gameData.pacman.phase], gameData.pacman.col * tile, gameData.pacman.row * tile);
+
+  drawRotatedImage(tiles.pTiles[gameData.pacman.phase], gameData.pacman.col * tile, gameData.pacman.row * tile, gameData.pacman.angle);
   let t;
   if (gameData.gameReversed) {
     t = tiles.gReversedTiles;
@@ -162,6 +163,15 @@ function repaintCanvas() {
 
   paintScore();
   paintLives();
+}
+
+function drawRotatedImage(image, x, y, angle) { 
+  let context = gameData.ctx;
+	context.save(); 
+	context.translate(x+tile/2, y+tile/2);
+	context.rotate(angle * (Math.PI/180));
+	context.drawImage(image, -(image.width/2), -(image.height/2));
+	context.restore(); 
 }
 
 function paintScore() {
@@ -185,6 +195,12 @@ function changeDir(fig) {
     if (fig.nextDir != -1 && !canMove(fig) || fig.nextDir != -1 &&
       Maze[fig.row + dirs[fig.nextDir][0]][fig.col + dirs[fig.nextDir][1]] != 0) {
       fig.dir = fig.nextDir;
+      switch(fig.dir){
+        case 0: fig.angle = 0; break;
+        case 1: fig.angle = 90; break;
+        case 2: fig.angle = 180; break;
+        case 3: fig.angle = 270; break;
+      }
     }
   }
 }
@@ -262,6 +278,7 @@ function resetFigure(fig) {
   fig.dir = 0;
   fig.nextDir = -1;
   fig.phase = 2;
+  fig.angle = 0;
 }
 
 function initGame() {
@@ -386,11 +403,8 @@ function Figure() {
   this.pn = 1;
   this.dir = 0; // the directions we could go
   this.nextDir = -1;  // the current moving direction
-  this.dx = 0;  // delta value for x-movement
-  this.dy = 0;  // delta value for y-movement
-  this.osx = 0;  // x-offset for smooth animation
-  this.osy = 0;  // y-offset for smooth animation
   this.speed = 0;
+  this.angle = 0;
 }
 
 
