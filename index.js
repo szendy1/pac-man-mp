@@ -82,18 +82,21 @@ class Canvas extends React.Component {
     //initGame();
     canvas.onclick = function () { pauseGame(); };
 
-    console.log(Maze)
+    console.log(this.state.Maze)
   }
 
   render() {
     return (
       <div>
+        <label>Player1</label>
+        <label>Player2</label>
         <canvas id="canvas" width={cWidth} height={cHeight} />
       </div>
     )
   }
   initGame() {
-
+    Maze = this.state.Maze;
+    console.log(this.state.Maze)
     initVariables();
     initCanvas();
     resetFigure(gameData.pacman);
