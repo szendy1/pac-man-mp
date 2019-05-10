@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import './style.css';
+import { database } from "./config";
 
 let Maze = [
   '00000000000000000000',
@@ -50,16 +51,38 @@ let gameData = {
   pillMaze: null,
   gameReversed: false,
   lives: 0,
-
+  Maze: [],
 };
 
 
+
+
 class Canvas extends React.Component {
+  constructor(props) {
+    super(props);
+    let mazeRef = database
+      .collection("Maze")
+      .doc('Duy9LsnGMcJFd1q0g64C');
+    this.unsubscribe = null;
+    this.state = {
+      Maze: []
+    };
+  }
+
   componentDidMount() {
     gameData.canvas = document.getElementById('canvas')
     gameData.ctx = canvas.getContext("2d")
-    initGame();
+    this.unsubscribe = database
+      .collection("Maze")
+      .doc('Duy9LsnGMcJFd1q0g64C').onSnapshot((snap) =>
+        this.setState({
+          Maze: snap.data().description
+        }, this.initGame()));
+
+    //initGame();
     canvas.onclick = function () { pauseGame(); };
+
+    console.log(Maze)
   }
 
   render() {
@@ -68,6 +91,14 @@ class Canvas extends React.Component {
         <canvas id="canvas" width={cWidth} height={cHeight} />
       </div>
     )
+  }
+  initGame() {
+
+    initVariables();
+    initCanvas();
+    resetFigure(gameData.pacman);
+    resetFigure(gameData.ghost);
+    console.log("Game Initialized");
   }
 }
 
@@ -94,40 +125,40 @@ function move() {
   changeDir(p);
   changeDir(g);
   if (!figureInMiddle(p) || canMove(p)) {
-    p.row += dirs[p.dir][0]/aStep;
-    p.col += dirs[p.dir][1]/aStep;
+    p.row += dirs[p.dir][0] / aStep;
+    p.col += dirs[p.dir][1] / aStep;
     p.phase += p.pn;
-    if (p.phase==3) p.pn=-1;
-    if (p.phase==0) p.pn=1;
+    if (p.phase == 3) p.pn = -1;
+    if (p.phase == 0) p.pn = 1;
   }
   if (!figureInMiddle(g) || canMove(g)) {
-    g.row += dirs[g.dir][0]/aStep;
-    g.col += dirs[g.dir][1]/aStep;
+    g.row += dirs[g.dir][0] / aStep;
+    g.col += dirs[g.dir][1] / aStep;
     g.phase += 1;
   }
   if (gameData.gameReversed && new Date() - gameData.timer > 20000) {
     gameData.gameReversed = !gameData.gameReversed;
   }
-  if (!checkCollisions()){
+  if (!checkCollisions()) {
     repaintCanvas();
   }
   if (gameData.gameStarted && !gameData.gamePaused) {
-        var dateB=new Date();
-        var mTO= dateA.getTime()-dateB.getTime();
-        mTO+=Math.round(aSpeed/aStep);
-        if (mTO<5) mTO=5; // minimum delay 5 msecs
-        // set up the timout and store a reference in pacTimer
-        pacTimer= setTimeout(move,mTO);
-    }
+    var dateB = new Date();
+    var mTO = dateA.getTime() - dateB.getTime();
+    mTO += Math.round(aSpeed / aStep);
+    if (mTO < 5) mTO = 5; // minimum delay 5 msecs
+    // set up the timout and store a reference in pacTimer
+    pacTimer = setTimeout(move, mTO);
+  }
 }
 
-function paintPauseScreen(){
+function paintPauseScreen() {
   gameData.ctx.fillStyle = 'black'//"#FF0000";
   gameData.ctx.fillRect(0, 0, cWidth, cHeight);
   gameData.ctx.font = tile + "px Comic Sans MS";
   gameData.ctx.fillStyle = "white";
-  gameData.ctx.fillText("Game Paused", cWidth/2-100, cHeight/2-25);
-  gameData.ctx.fillText("Click to play !", cWidth/2-105, cHeight/2+25);
+  gameData.ctx.fillText("Game Paused", cWidth / 2 - 100, cHeight / 2 - 25);
+  gameData.ctx.fillText("Click to play !", cWidth / 2 - 105, cHeight / 2 + 25);
 }
 
 function repaintCanvas() {
@@ -160,19 +191,19 @@ function repaintCanvas() {
   else {
     t = tiles.gTiles;
   }
-  gameData.ctx.drawImage(t[gameData.ghost.phase%2], gameData.ghost.col * tile, gameData.ghost.row * tile);
+  gameData.ctx.drawImage(t[gameData.ghost.phase % 2], gameData.ghost.col * tile, gameData.ghost.row * tile);
 
   paintScore();
   paintLives();
 }
 
-function drawRotatedImage(image, x, y, angle) { 
+function drawRotatedImage(image, x, y, angle) {
   let context = gameData.ctx;
-	context.save(); 
-	context.translate(x+tile/2, y+tile/2);
-	context.rotate(angle * (Math.PI/180));
-	context.drawImage(image, -(image.width/2), -(image.height/2));
-	context.restore(); 
+  context.save();
+  context.translate(x + tile / 2, y + tile / 2);
+  context.rotate(angle * (Math.PI / 180));
+  context.drawImage(image, -(image.width / 2), -(image.height / 2));
+  context.restore();
 }
 
 function paintScore() {
@@ -196,7 +227,7 @@ function changeDir(fig) {
     if (fig.nextDir != -1 && !canMove(fig) || fig.nextDir != -1 &&
       Maze[fig.row + dirs[fig.nextDir][0]][fig.col + dirs[fig.nextDir][1]] != 0) {
       fig.dir = fig.nextDir;
-      switch(fig.dir){
+      switch (fig.dir) {
         case 0: fig.angle = 0; break;
         case 1: fig.angle = 90; break;
         case 2: fig.angle = 180; break;
@@ -305,6 +336,8 @@ function initVariables() {
   gameData.gameStarted = false;
   gameData.lives = 3;
   initTiles();
+
+  console.log(gameData.Maze)
 }
 
 function initTiles() {
@@ -378,10 +411,10 @@ function pauseGame() {
 
     if (pacTimer) clearTimeout(pacTimer);
     gameData.gamePaused = !gameData.gamePaused;
-    if (gameData.gamePaused){
+    if (gameData.gamePaused) {
       paintPauseScreen();
     }
-    else{
+    else {
       repaintCanvas();
       move();
     }
@@ -410,7 +443,6 @@ function Figure() {
   this.speed = 0;
   this.angle = 0;
 }
-
 
 //export default Canvas
 render(<Canvas />, document.getElementById('root'));

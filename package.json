@@ -3,9 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "firebase": "^6.0.2",
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0"
+    "@firebase/util": "^0.2.15",
+    "firebase": "6.0.2",
+    "react": "16.8.6",
+    "react-dom": "16.8.6"
   },
   "scripts": {
     "start": "react-scripts start",
