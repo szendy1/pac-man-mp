@@ -53,6 +53,26 @@ let gameData = {
   lives: 0,
   Maze: [],
 };
+let canvasButtons = {
+  newGameX: cWidth / 2 - 90,
+  newGameY: cHeight / 2 -25,
+  btnNewWidth: 154,
+  btnNewHeight: 28,
+  highScoreX: cWidth / 2 - 105,
+  highScoreY: cHeight / 2 +25,
+  btnScoreWidth: 182,
+  btnScoreHeight: 36,
+  map1X: 0,
+  map1Y: 0,
+  map2X: 0,
+  map2Y: 0,
+  map3X: 0,
+  map3Y: 0,
+  map4X: 0,
+  map4Y: 0,
+  mapLen: 0,
+  mapWidth: 0,
+}
 
 
 
@@ -75,21 +95,20 @@ class Canvas extends React.Component {
     this.unsubscribe = database
       .collection("Maze")
       .doc('Duy9LsnGMcJFd1q0g64C').onSnapshot((snap) =>
-        this.setState({
-          Maze: snap.data().description
-        }, this.initGame()));
+        gameData.Maze = snap.data().description
+      );
+    /*this.setState({
+      Maze: snap.data().description
+    }));*/
+    // , this.initGame()));
 
-    //initGame();
-    canvas.onclick = function () { pauseGame(); };
-
-    console.log(this.state.Maze)
+    showInitScreen();
+    canvas.onclick = function () { clickEvent(event); };
   }
 
   render() {
     return (
       <div>
-        <label>Player1</label>
-        <label>Player2</label>
         <canvas id="canvas" width={cWidth} height={cHeight} />
       </div>
     )
@@ -103,6 +122,38 @@ class Canvas extends React.Component {
     resetFigure(gameData.ghost);
     console.log("Game Initialized");
   }
+}
+
+function clickEvent(e){
+  console.log(e.x);
+  console.log(canvasButtons.newGameX)
+  console.log(canvasButtons.newGameX+canvasButtons.btnNewWidth)
+ // console.log(e.y);
+  if (gameData.gameStarted){
+    pauseGame();
+  }
+  else{
+    let x = e.x -8;
+    let y = e.y -8;
+    if (x >= canvasButtons.newGameX && x <= canvasButtons.newGameX+canvasButtons.btnNewWidth &&
+    y >= canvasButtons.newGameY && y <= canvasButtons.newGameY+canvasButtons.btnNewHeight){
+      showChooseMapScreen();
+    }
+    else if (x >= canvasButtons.highScoreX && x <= canvasButtons.highScoreY+canvasButtons.btnScoreWidth &&
+    y >= canvasButtons.highScoreY && y <= canvasButtons.highScoreY+canvasButtons.btnScoreHeight){
+      showHighScoresScreen();
+    }
+  }
+}
+
+function showChooseMapScreen(){
+
+  console.log("NewMap")
+}
+
+function showHighScoresScreen(){
+
+  console.log("higjScre")
 }
 
 document.addEventListener('keydown', function (event) {
@@ -119,6 +170,17 @@ document.addEventListener('keydown', function (event) {
     }
   }
 });
+
+function showInitScreen(){
+  gameData.ctx.fillStyle = 'black'//"#FF0000";
+  gameData.ctx.fillRect(0, 0, cWidth, cHeight);
+  gameData.ctx.font = tile + "px Comic Sans MS";
+  gameData.ctx.fillStyle = "white";
+  //gameData.ctx.fillRect(canvasButtons.newGameX, canvasButtons.newGameY, 154, 28);
+  gameData.ctx.fillText("New Game", canvasButtons.newGameX, canvasButtons.newGameY+26);
+  //gameData.ctx.fillRect(canvasButtons.highScoreX, canvasButtons.highScoreY, 182, 36);
+  gameData.ctx.fillText("High Scores", canvasButtons.highScoreX, canvasButtons.highScoreY+26);
+}
 
 function move() {
   if (pacTimer) clearTimeout(pacTimer);
@@ -339,8 +401,6 @@ function initVariables() {
   gameData.gameStarted = false;
   gameData.lives = 3;
   initTiles();
-
-  console.log(gameData.Maze)
 }
 
 function initTiles() {
@@ -423,11 +483,14 @@ function pauseGame() {
     }
   }
   else {
+    console.log(gameData.Maze)
     startGame();
   }
 }
 
 function startGame() {
+
+  initGame();
   gameData.gameStarted = true;
   move();
   console.log("Game started");
