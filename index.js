@@ -5,16 +5,16 @@ import { database } from "./config";
 
 let Maze = [
   '00000000000000000000',
-  '02111111000011111120',
-  '01010101111110101010',
-  '01110100000000101110',
-  '01000111111111100010',
-  '011111100EE001111110',
-  '00000100EEGE00100000',
-  '01111110000001111110',
-  '010001111P1111100010',
-  '01011100000000111010',
-  '02110111111111101120',
+  '02111111111111111120',
+  '01000101000010100010',
+  '01011111111111111010',
+  '011101010E0010101110',
+  '010001010EG010100010',
+  '01111101000010111110',
+  '01000101111110100010',
+  '01111111000011111110',
+  '01010001110111000010',
+  '021111110P1101111120',
   '00000000000000000000',
 ]
 let imageAdress = 'https://raw.githubusercontent.com/szendy1/pac-man-mp/master/img/';
@@ -62,6 +62,10 @@ let canvasButtons = {
   highScoreY: cHeight / 2 +25,
   btnScoreWidth: 182,
   btnScoreHeight: 36,
+  menuX : 50,
+  menuY : 20,
+  menuWidth: 60,
+  menuHeight: 21,
   map1X: 0,
   map1Y: 0,
   map2X: 0,
@@ -73,6 +77,7 @@ let canvasButtons = {
   mapLen: 0,
   mapWidth: 0,
 }
+let backPossible = false;
 
 
 
@@ -80,10 +85,6 @@ let canvasButtons = {
 class Canvas extends React.Component {
   constructor(props) {
     super(props);
-    let mazeRef = database
-      .collection("Maze")
-      .doc('Duy9LsnGMcJFd1q0g64C');
-    this.unsubscribe = null;
     this.state = {
       Maze: []
     };
@@ -102,8 +103,9 @@ class Canvas extends React.Component {
     }));*/
     // , this.initGame()));
 
-    showInitScreen();
+    showMenuScreen();
     canvas.onclick = function () { clickEvent(event); };
+    //initGame();
   }
 
   render() {
@@ -138,10 +140,17 @@ function clickEvent(e){
     if (x >= canvasButtons.newGameX && x <= canvasButtons.newGameX+canvasButtons.btnNewWidth &&
     y >= canvasButtons.newGameY && y <= canvasButtons.newGameY+canvasButtons.btnNewHeight){
       showChooseMapScreen();
+      backPossible = true;
     }
     else if (x >= canvasButtons.highScoreX && x <= canvasButtons.highScoreY+canvasButtons.btnScoreWidth &&
     y >= canvasButtons.highScoreY && y <= canvasButtons.highScoreY+canvasButtons.btnScoreHeight){
       showHighScoresScreen();
+      backPossible = true;
+    }
+    else if (backPossible && x >= canvasButtons.menuX && x <= canvasButtons.menuX+canvasButtons.menuWidth &&
+    y >= canvasButtons.menuY && y <= canvasButtons.menuY+canvasButtons.menuHeight){
+      showMenuScreen();
+      backPossible = false;
     }
   }
 }
@@ -153,7 +162,18 @@ function showChooseMapScreen(){
 
 function showHighScoresScreen(){
 
-  console.log("higjScre")
+  gameData.ctx.fillStyle = 'black'//"#FF0000";
+  gameData.ctx.fillRect(0, 0, cWidth, cHeight);
+  gameData.ctx.font =  "20px Comic Sans MS";
+  gameData.ctx.fillStyle = "white";
+
+  gameData.ctx.fillText("< Back", canvasButtons.menuX, canvasButtons.menuY+20);
+  let y = 80;
+  gameData.ctx.fillText("#", 20, y);
+  gameData.ctx.fillText("Pac-man", 50, y);
+  gameData.ctx.fillText("Score", 150, y);
+  gameData.ctx.fillText("Ghost", 260, y);
+  gameData.ctx.fillText("Score", 350, y);
 }
 
 document.addEventListener('keydown', function (event) {
@@ -171,7 +191,7 @@ document.addEventListener('keydown', function (event) {
   }
 });
 
-function showInitScreen(){
+function showMenuScreen(){
   gameData.ctx.fillStyle = 'black'//"#FF0000";
   gameData.ctx.fillRect(0, 0, cWidth, cHeight);
   gameData.ctx.font = tile + "px Comic Sans MS";
