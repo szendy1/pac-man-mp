@@ -127,10 +127,6 @@ class Canvas extends React.Component {
 }
 
 function clickEvent(e){
-  console.log(e.x);
-  console.log(canvasButtons.newGameX)
-  console.log(canvasButtons.newGameX+canvasButtons.btnNewWidth)
- // console.log(e.y);
   if (gameData.gameStarted){
     pauseGame();
   }
