@@ -82,6 +82,7 @@ let canvasButtons = {
   mapWidth: 0,
 }
 let backPossible = false;
+let newMapScreen = false;
 
 
 
@@ -117,15 +118,6 @@ class Canvas extends React.Component {
       </div>
     )
   }
-  initGame() {
-    Maze = this.state.Maze;
-    console.log(this.state.Maze)
-    initVariables();
-    initCanvas();
-    resetFigure(gameData.pacman);
-    resetFigure(gameData.ghost);
-    console.log("Game Initialized");
-  }
 }
 
 function clickEvent(e) {
@@ -135,53 +127,87 @@ function clickEvent(e) {
   else {
     let x = e.x - 8;
     let y = e.y - 8;
-    if (x >= canvasButtons.newGameX && x <= canvasButtons.newGameX + canvasButtons.btnNewWidth &&
-      y >= canvasButtons.newGameY && y <= canvasButtons.newGameY + canvasButtons.btnNewHeight) {
+    if (newMapScreen) {
+      let mapClicked = false;
+      if (btnClicked(x,y,canvasButtons.menuX, canvasButtons.menuY,canvasButtons.menuWidth,canvasButtons.menuHeight)) {
+      showMenuScreen();
+      backPossible = false;
+      newMapScreen = false;
+      }
+      else if (1) {
+        gameData.mazeId = 0;
+        mapClicked = true;
+      }
+      else if (1) {
+        gameData.mazeId = 1;
+        mapClicked = true;
+      }
+      else if (1) {
+        gameData.mazeId = 2;
+        mapClicked = true;
+      }
+
+      if (mapClicked) {
+        startGame();
+      }
+    }
+    if (btnClicked(x,y, canvasButtons.newGameX,canvasButtons.newGameY, canvasButtons.btnNewWidth, canvasButtons.btnNewHeight)){
       showChooseMapScreen();
+      newMapScreen = true;
       backPossible = true;
     }
-    else if (x >= canvasButtons.highScoreX && x <= canvasButtons.highScoreY + canvasButtons.btnScoreWidth &&
-      y >= canvasButtons.highScoreY && y <= canvasButtons.highScoreY + canvasButtons.btnScoreHeight) {
+    else if (btnClicked(x,y,canvasButtons.highScoreX,canvasButtons.highScoreY,canvasButtons.btnScoreWidth,canvasButtons.btnScoreHeight)) {
       showHighScoresScreen();
       backPossible = true;
     }
-    else if (backPossible && x >= canvasButtons.menuX && x <= canvasButtons.menuX + canvasButtons.menuWidth &&
-      y >= canvasButtons.menuY && y <= canvasButtons.menuY + canvasButtons.menuHeight) {
+    else if (backPossible &&  btnClicked(x,y,canvasButtons.menuX, canvasButtons.menuY,canvasButtons.menuWidth,canvasButtons.menuHeight)) {
       showMenuScreen();
       backPossible = false;
+      newMapScreen = false;
+
     }
   }
 }
 
+function btnClicked(x, y, x1, y1, width, height) {
+if (x >= x1 && x <= x1 + width &&
+      y >= y1 && y <= y1 + height) return 1;
+  return 0;
+}
+
 function showChooseMapScreen() {
-  
+
   gameData.ctx.fillStyle = 'black';
   gameData.ctx.fillRect(0, 0, cWidth, cHeight);
   gameData.ctx.font = "20px Comic Sans MS";
   gameData.ctx.fillStyle = 'white';
-  gameData.ctx.fillText("Choose Map", cWidth/2-50, 20);
+  gameData.ctx.fillText("Choose Map", cWidth / 2 - 50, 20);
+  showBackBtn(canvasButtons.menuX, canvasButtons.menuY + 20);
+  paintMiniMap(50, 50, gameData.Maze[0]);
 
-  paintMiniMap(50,50,gameData.Maze[0]);
+  paintMiniMap(cWidth / 2 + 50, 50, gameData.Maze[1]);
 
-  paintMiniMap(cWidth/2+50,50,gameData.Maze[1]);
-
-  paintMiniMap(50,cHeight/2+20,gameData.Maze[2]);
+  paintMiniMap(50, cHeight / 2 + 20, gameData.Maze[2]);
 }
 
 function showHighScoresScreen() {
 
   gameData.ctx.fillStyle = 'black';
   gameData.ctx.fillRect(0, 0, cWidth, cHeight);
-  gameData.ctx.font = "20px Comic Sans MS";
-  gameData.ctx.fillStyle = "white";
-
-  gameData.ctx.fillText("< Back", canvasButtons.menuX, canvasButtons.menuY + 20);
   let y = 80;
+  showBackBtn(canvasButtons.menuX, canvasButtons.menuY + 20);
+
   gameData.ctx.fillText("#", 20, y);
   gameData.ctx.fillText("Pac-man", 50, y);
   gameData.ctx.fillText("Score", 150, y);
   gameData.ctx.fillText("Ghost", 260, y);
   gameData.ctx.fillText("Score", 350, y);
+}
+
+function showBackBtn(x, y) {
+  gameData.ctx.font = "20px Comic Sans MS";
+  gameData.ctx.fillStyle = "white";
+  gameData.ctx.fillText("< Back", x, y);
 }
 
 document.addEventListener('keydown', function (event) {
@@ -305,7 +331,7 @@ function paintPlayerNames() {
 
   gameData.ctx.font = tile + "px Comic Sans MS";
   gameData.ctx.fillStyle = "white";
-  gameData.ctx.fillText("" + p2Name + " :", cWidth/2+100, 28);
+  gameData.ctx.fillText("" + p2Name + " :", cWidth / 2 + 100, 28);
 }
 
 function paintScore() {
@@ -315,7 +341,7 @@ function paintScore() {
 
   gameData.ctx.font = tile + "px Comic Sans MS";
   gameData.ctx.fillStyle = "white";
-  gameData.ctx.fillText(gameData.score2, cWidth-100, 28);
+  gameData.ctx.fillText(gameData.score2, cWidth - 100, 28);
 }
 
 function paintLives() {
@@ -328,15 +354,13 @@ function paintLives() {
   }
 }
 
-function paintMiniMap(x,y,mapArray){
+function paintMiniMap(x, y, mapArray) {
   let miniTile = Math.round(tile / 3);
   gameData.ctx.fillStyle = "blue";
-  for (let i = 0; i < mapArray.length; i++){
-    for (let j = 0; j<mapArray[i].length;j++){
-       if (mapArray[i][j] == 0){
-          gameData.ctx.fillRect(x+miniTile*j, y+miniTile*i, miniTile, miniTile);
-          console.log(x+miniTile*i);
-          console.log( y+miniTile*j);
+  for (let i = 0; i < mapArray.length; i++) {
+    for (let j = 0; j < mapArray[i].length; j++) {
+      if (mapArray[i][j] == 0) {
+        gameData.ctx.fillRect(x + miniTile * j, y + miniTile * i, miniTile, miniTile);
       }
     }
   }
@@ -373,8 +397,8 @@ function checkCollisions() {
 
     }
     else {
-      gameData.score2 += Math.round(gameData.score1/2);
-      gameData.score1 = Math.round(gameData.score1/2);
+      gameData.score2 += Math.round(gameData.score1 / 2);
+      gameData.score1 = Math.round(gameData.score1 / 2);
       pacmanDying();
       resetFigure(gameData.pacman);
       resetFigure(gameData.ghost);
@@ -542,7 +566,6 @@ function pauseGame() {
     }
   }
   else {
-    console.log(gameData.Maze)
     startGame();
   }
 }
