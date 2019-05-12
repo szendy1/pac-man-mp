@@ -103,17 +103,11 @@ class Canvas extends React.Component {
         gameData.Maze.push(snap.data().description);
         gameData.Maze.push(snap.data().description1);
         gameData.Maze.push(snap.data().description2);
-        //gameData.Maze = snap.data().description
       }
       );
-    /*this.setState({
-      Maze: snap.data().description
-    }));*/
-    // , this.initGame()));
 
     showMenuScreen();
     canvas.onclick = function () { clickEvent(event); };
-    //initGame();
   }
 
   render() {
@@ -160,8 +154,6 @@ function clickEvent(e) {
 }
 
 function showChooseMapScreen() {
-  /*initGame();
-  startGame();*/
   
   gameData.ctx.fillStyle = 'black';
   gameData.ctx.fillRect(0, 0, cWidth, cHeight);
@@ -174,7 +166,6 @@ function showChooseMapScreen() {
   paintMiniMap(cWidth/2+50,50,gameData.Maze[1]);
 
   paintMiniMap(50,cHeight/2+20,gameData.Maze[2]);
-  //console.log("NewMap")
 }
 
 function showHighScoresScreen() {
@@ -213,9 +204,7 @@ function showMenuScreen() {
   gameData.ctx.fillRect(0, 0, cWidth, cHeight);
   gameData.ctx.font = tile + "px Comic Sans MS";
   gameData.ctx.fillStyle = "white";
-  //gameData.ctx.fillRect(canvasButtons.newGameX, canvasButtons.newGameY, 154, 28);
   gameData.ctx.fillText("New Game", canvasButtons.newGameX, canvasButtons.newGameY + 26);
-  //gameData.ctx.fillRect(canvasButtons.highScoreX, canvasButtons.highScoreY, 182, 36);
   gameData.ctx.fillText("High Scores", canvasButtons.highScoreX, canvasButtons.highScoreY + 26);
 }
 
@@ -293,9 +282,7 @@ function repaintCanvas() {
   else {
     t = tiles.gTiles;
   }
-  /* if (gameData.ghost.angle == 180)
-     drawRotatedImage(t[gameData.ghost.phase% 2],gameData.ghost.col * tile, gameData.ghost.row * tile, gameData.ghost.angle);
-   else */
+
   gameData.ctx.drawImage(t[gameData.ghost.phase % 2], gameData.ghost.col * tile, gameData.ghost.row * tile);
   paintPlayerNames();
   paintScore();
@@ -353,7 +340,6 @@ function paintMiniMap(x,y,mapArray){
       }
     }
   }
-  
 }
 
 function changeDir(fig) {
@@ -505,7 +491,7 @@ function initTiles() {
 }
 
 function initCanvas() {
-  gameData.ctx.fillStyle = 'black'//"#FF0000";
+  gameData.ctx.fillStyle = 'black';
   gameData.ctx.fillRect(0, 0, cWidth, cHeight);
   gameData.ctx.fillStyle = "blue";
   for (let i = 0; i < Maze.length; i++) {
