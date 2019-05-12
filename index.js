@@ -129,10 +129,10 @@ function clickEvent(e) {
     let y = e.y - 8;
     if (newMapScreen) {
       let mapClicked = false;
-      if (btnClicked(x,y,canvasButtons.menuX, canvasButtons.menuY,canvasButtons.menuWidth,canvasButtons.menuHeight)) {
-      showMenuScreen();
-      backPossible = false;
-      newMapScreen = false;
+      if (btnClicked(x, y, canvasButtons.menuX, canvasButtons.menuY, canvasButtons.menuWidth, canvasButtons.menuHeight)) {
+        showMenuScreen();
+        backPossible = false;
+        newMapScreen = false;
       }
       else if (1) {
         gameData.mazeId = 0;
@@ -148,19 +148,21 @@ function clickEvent(e) {
       }
 
       if (mapClicked) {
+        p1Name = document.getElementById("pName1").value;
+        p2Name = document.getElementById("pName2").value;
         startGame();
       }
     }
-    if (btnClicked(x,y, canvasButtons.newGameX,canvasButtons.newGameY, canvasButtons.btnNewWidth, canvasButtons.btnNewHeight)){
+    if (btnClicked(x, y, canvasButtons.newGameX, canvasButtons.newGameY, canvasButtons.btnNewWidth, canvasButtons.btnNewHeight)) {
       showChooseMapScreen();
       newMapScreen = true;
       backPossible = true;
     }
-    else if (btnClicked(x,y,canvasButtons.highScoreX,canvasButtons.highScoreY,canvasButtons.btnScoreWidth,canvasButtons.btnScoreHeight)) {
+    else if (btnClicked(x, y, canvasButtons.highScoreX, canvasButtons.highScoreY, canvasButtons.btnScoreWidth, canvasButtons.btnScoreHeight)) {
       showHighScoresScreen();
       backPossible = true;
     }
-    else if (backPossible &&  btnClicked(x,y,canvasButtons.menuX, canvasButtons.menuY,canvasButtons.menuWidth,canvasButtons.menuHeight)) {
+    else if (backPossible && btnClicked(x, y, canvasButtons.menuX, canvasButtons.menuY, canvasButtons.menuWidth, canvasButtons.menuHeight)) {
       showMenuScreen();
       backPossible = false;
       newMapScreen = false;
@@ -170,8 +172,8 @@ function clickEvent(e) {
 }
 
 function btnClicked(x, y, x1, y1, width, height) {
-if (x >= x1 && x <= x1 + width &&
-      y >= y1 && y <= y1 + height) return 1;
+  if (x >= x1 && x <= x1 + width &&
+    y >= y1 && y <= y1 + height) return 1;
   return 0;
 }
 
@@ -331,13 +333,13 @@ function paintPlayerNames() {
 
   gameData.ctx.font = tile + "px Comic Sans MS";
   gameData.ctx.fillStyle = "white";
-  gameData.ctx.fillText("" + p2Name + " :", cWidth / 2 + 100, 28);
+  gameData.ctx.fillText("" + p2Name + " :", cWidth / 2 + 50, 28);
 }
 
 function paintScore() {
   gameData.ctx.font = tile + "px Comic Sans MS";
   gameData.ctx.fillStyle = "white";
-  gameData.ctx.fillText(gameData.score1, 200, 28);
+  gameData.ctx.fillText(gameData.score1, 240, 28);
 
   gameData.ctx.font = tile + "px Comic Sans MS";
   gameData.ctx.fillStyle = "white";
