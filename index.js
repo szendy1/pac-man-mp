@@ -128,25 +128,31 @@ class Canvas extends React.Component {
     this.unsubscribe1 = database
       .collection("game_info")
       .doc('data').onSnapshot((snapshot) => {
-        console.log("heya")
         let scoreData = snapshot.data();
-        let newData = [];
-        for (let val in scoreData) {
-          newData.push({
-            pacManName: scoreData[val].pacManName,
-            score1: scoreData[val].score1,
-            ghostName: scoreData[val].ghostName,
-            score2: scoreData[val].pacManName,
+        let newData = scoreData.highScores;
+        let newData1 = [];
+        console.log(newData);
+        for (let val in newData) {
+          newData1.push({
+            pacManName: newData[val].pacManName,
+            score1: newData[val].score1,
+            ghostName: newData[val].ghostName,
+            score2: newData[val].score2,
           });
         }
-        newData.sort((a, b) => (a.score1 + a.score2 > b.score1 + b.score2) ? 1 : -1)
-        highScoreData = newData;
+        newData1.sort((a, b) => (a.score1 + a.score2 < b.score1 + b.score2) ? 1 : -1)
+        highScoreData = newData1;
         console.log(highScoreData);
       }
       );
 
     showMenuScreen();
     canvas.onclick = function () { clickEvent(event); };
+  }
+  
+  componentWillUnmount(){
+    this.unsubscribe();
+    this.unsubscribe1();
   }
 
   render() {
