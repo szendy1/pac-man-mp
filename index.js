@@ -4,20 +4,7 @@ import './style.css';
 import { db, database } from "./config";
 import * as firebase from 'firebase/app'
 
-let Maze;/*= [
-  '00000000000000000000',
-  '02111111111111111120',
-  '01000101000010100010',
-  '01011111111111111010',
-  '011101010E0010101110',
-  '010001010EG010100010',
-  '01111101000010111110',
-  '01000101111110100010',
-  '01111111000011111110',
-  '01010001110111000010',
-  '021111110P1101111120',
-  '00000000000000000000',
-]*/
+let Maze;
 let p1Name = "Pac-Man";
 let p2Name = "Ghost";
 let imageAdress = 'https://raw.githubusercontent.com/szendy1/pac-man-mp/master/img/';
@@ -57,6 +44,7 @@ let gameData = {
   gameReversed: false,
   lives: 0,
   Maze: [],
+  pacDied: false,
 };
 let canvasButtons = {
   newGameX: cWidth / 2 - 90,
@@ -71,16 +59,14 @@ let canvasButtons = {
   menuY: 20,
   menuWidth: 60,
   menuHeight: 21,
-  map1X: 0,
+  /*map1X: 0,
   map1Y: 0,
   map2X: 0,
   map2Y: 0,
   map3X: 0,
   map3Y: 0,
-  map4X: 0,
-  map4Y: 0,
   mapLen: 0,
-  mapWidth: 0,
+  mapWidth: 0,*/
 }
 let backPossible = false;
 let newMapScreen = false;
@@ -90,12 +76,6 @@ let highScoreData = [];
 
 
 class Canvas extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      Maze: []
-    };
-  }
 
   componentDidMount() {
     gameData.canvas = document.getElementById('canvas')
@@ -108,30 +88,12 @@ class Canvas extends React.Component {
         gameData.Maze.push(snap.data().description2);
       }
       );
-    /*let dbRef = db.ref("game_info").doc/data");
-    dbRef.on('value', (snapshot) => {
-      console.log("heya")
-      let scoreData = snapshot.val();
-      let newData = [];
-      for (let val in scoreData) {
-        newData.push({
-          pacManName: scoreData[val].pacManName,
-          score1: scoreData[val].score1,
-          ghostName: scoreData[val].ghostName,
-          score2: scoreData[val].pacManName,
-        });
-      }
-      newData.sort((a, b) => (a.score1 + a.score2 > b.score1 + b.score2) ? 1 : -1)
-      highScoreData = newData;
-      console.log(highScoreData);
-    });*/
     this.unsubscribe1 = database
       .collection("game_info")
       .doc('data').onSnapshot((snapshot) => {
         let scoreData = snapshot.data();
         let newData = scoreData.highScores;
         let newData1 = [];
-        console.log(newData);
         for (let val in newData) {
           newData1.push({
             pacManName: newData[val].pacManName,
@@ -142,15 +104,14 @@ class Canvas extends React.Component {
         }
         newData1.sort((a, b) => (a.score1 + a.score2 < b.score1 + b.score2) ? 1 : -1)
         highScoreData = newData1;
-        console.log(highScoreData);
       }
       );
 
     showMenuScreen();
     canvas.onclick = function () { clickEvent(event); };
   }
-  
-  componentWillUnmount(){
+
+  componentWillUnmount() {
     this.unsubscribe();
     this.unsubscribe1();
   }
@@ -165,23 +126,18 @@ class Canvas extends React.Component {
 }
 
 function addScoreToDB() {
-  let c = {pacManName: p1Name,
+  let c = {
+    pacManName: p1Name,
     score1: gameData.score1,
     ghostName: p2Name,
     score2: gameData.score2,
     mapId: gameData.mazeId,
-    timestamp: new Date(),};
+    timestamp: new Date(),
+  };
   database.collection('game_info').doc('data').update({
-  /*  pacManName: p1Name,
-    score1: gameData.score1,
-    ghostName: p2Name,
-    score2: gameData.score2,
-    mapId: gameData.mazeId,
-    timestamp: new Date(),*/
-
     'highScores': firebase.firestore.FieldValue.arrayUnion(c)
   }).then(() => {
-    console.log("Data pushed to DB");
+    //console.log("Data pushed to DB");
   }).catch((err) => {
     console.log(err);
   });
@@ -196,20 +152,21 @@ function clickEvent(e) {
     let y = e.y - 8;
     if (newMapScreen) {
       let mapClicked = false;
+      let miniTile = Math.round(tile / 3);
       if (btnClicked(x, y, canvasButtons.menuX, canvasButtons.menuY, canvasButtons.menuWidth, canvasButtons.menuHeight)) {
         showMenuScreen();
         backPossible = false;
         newMapScreen = false;
       }
-      else if (1) {
+      else if (btnClicked(x, y, 50, 50, miniTile * 20, miniTile * 12)) {
         gameData.mazeId = 0;
         mapClicked = true;
       }
-      else if (1) {
+      else if (btnClicked(x, y, cWidth / 2 + 50, 50, miniTile * 20, miniTile * 12)) {
         gameData.mazeId = 1;
         mapClicked = true;
       }
-      else if (1) {
+      else if (btnClicked(x, y, 50, cHeight / 2 + 20, miniTile * 20, miniTile * 12)) {
         gameData.mazeId = 2;
         mapClicked = true;
       }
@@ -260,20 +217,34 @@ function showChooseMapScreen() {
 }
 
 function showHighScoresScreen() {
-  console.log(highScoreData);
   gameData.ctx.fillStyle = 'black';
   gameData.ctx.fillRect(0, 0, cWidth, cHeight);
   let y = 80;
   showBackBtn(canvasButtons.menuX, canvasButtons.menuY + 20);
+  let scorePos = {
+    num: 20,
+    pac: 50,
+    score1: 200,
+    ghost: 320,
+    score2: 500,
+  };
+  gameData.ctx.fillStyle = 'yellow';
+  gameData.ctx.fillText("#", scorePos.num, y);
+  gameData.ctx.fillText("Pac-man", scorePos.pac, y);
+  gameData.ctx.fillText("Score", scorePos.score1, y);
+  gameData.ctx.fillText("Ghost", scorePos.ghost, y);
+  gameData.ctx.fillText("Score", scorePos.score2, y);
 
-  gameData.ctx.fillText("#", 20, y);
-  gameData.ctx.fillText("Pac-man", 50, y);
-  gameData.ctx.fillText("Score", 150, y);
-  gameData.ctx.fillText("Ghost", 260, y);
-  gameData.ctx.fillText("Score", 350, y);
 
-
-
+  gameData.ctx.fillStyle = 'white';
+  for (let i = 0; i < highScoreData.length && i < 10; i++) {
+    y += 36;
+    gameData.ctx.fillText(i + 1, scorePos.num, y);
+    gameData.ctx.fillText(highScoreData[i].pacManName, scorePos.pac, y);
+    gameData.ctx.fillText(highScoreData[i].score1, scorePos.score1, y);
+    gameData.ctx.fillText(highScoreData[i].ghostName, scorePos.ghost, y);
+    gameData.ctx.fillText(highScoreData[i].score2, scorePos.score2, y);
+  }
 }
 
 function showBackBtn(x, y) {
@@ -342,8 +313,8 @@ function move() {
 }
 
 function paintPauseScreen() {
-  gameData.ctx.fillStyle = 'black';
-  gameData.ctx.fillRect(0, 0, cWidth, cHeight);
+  // gameData.ctx.fillStyle = 'black';
+  // gameData.ctx.fillRect(0, 0, cWidth, cHeight);
   gameData.ctx.font = tile + "px Comic Sans MS";
   gameData.ctx.fillStyle = "white";
   gameData.ctx.fillText("Game Paused", cWidth / 2 - 100, cHeight / 2 - 25);
@@ -371,8 +342,12 @@ function repaintCanvas() {
       }
     }
   }
-
+  /* if (gameData.pacDied) {
+     gameData.ctx.drawImage(tiles.pDeathTiles[gameData.pacman.phase], gameData.pacman.col * tile, gameData.pacman.row * tile);
+   }
+   else {*/
   drawRotatedImage(tiles.pTiles[gameData.pacman.phase], gameData.pacman.col * tile, gameData.pacman.row * tile, gameData.pacman.angle);
+
   let t;
   if (gameData.gameReversed) {
     t = tiles.gReversedTiles;
@@ -471,15 +446,18 @@ function checkCollisions() {
     else {
       gameData.score2 += Math.round(gameData.score1 / 2);
       gameData.score1 = Math.round(gameData.score1 / 2);
+      gameData.pacDied = true;
+      gameData.pacman.phase = 0;
       pacmanDying();
       resetFigure(gameData.pacman);
       resetFigure(gameData.ghost);
       gameData.lives -= 1;
       if (gameData.lives == -1) {
         addScoreToDB();
-        stopGame();//TODO
+        stopGame();
       }
     }
+    repaintCanvas();
     pauseGame();
     if (pacTimer) clearTimeout(pacTimer);
     return true;
@@ -493,7 +471,8 @@ function checkCollisions() {
         gameData.score1 += 10;
         if (allPillsEaten()) {
           gameData.lives += 1;
-          startNewLevel(); //TODO
+          startNewLevel();
+          pauseGame();
         }
         break;
       case 2:
@@ -504,6 +483,41 @@ function checkCollisions() {
     }
   }
   return false;
+}
+
+function startNewLevel() {
+  resetFigure(gameData.pacman);
+  resetFigure(gameData.ghost);
+  if (gameData.gameReversed){
+    gameData.gameReversed = false;
+  }
+
+  for (let i = 0; i < Maze.length; i++) {
+    for (let j = 0; j < Maze[i].length; j++) {
+      switch (Maze[i].charAt(j)) {
+        case '0':
+          gameData.pillMaze[i][j] = 0;
+          break;
+        case '1':
+          gameData.pillMaze[i][j] = 1;
+          break;
+        case '2':
+          gameData.pillMaze[i][j] = 2;
+          break;
+      }
+    }
+  }
+}
+
+function stopGame() {
+  gameData.ctx.fillStyle = 'black';
+  gameData.ctx.fillRect(0, 0, cWidth, cHeight);
+  gameData.ctx.font = tile + "px Comic Sans MS";
+  gameData.ctx.fillStyle = "white";
+  gameData.ctx.fillText("Game Over !", cWidth / 2 - 100, cHeight / 2 - 25);
+
+  gameData.ctx.fillText(p1Name + "score :"+ gameData.score1, cWidth / 2 - 100, cHeight / 2 - 25);
+  gameData.ctx.fillText("Click to return tu main menu !", cWidth / 2 - 205, cHeight / 2 + 25);
 }
 
 function allPillsEaten() {
@@ -527,7 +541,23 @@ function figureInMiddle(fig) {
 }
 
 function pacmanDying() {
-  //do animation TODO
+  /*//do animation TODO
+  if (pacTimer) clearTimeout(pacTimer);
+  let dateA = new Date();
+  repaintCanvas();
+  gameData.pacman.phase +=1;
+
+  if (gameData.pacman.phase < 2) {
+    var dateB = new Date();
+    var mTO = dateA.getTime() - dateB.getTime();
+    mTO += Math.round(aSpeed / aStep);
+    pacTimer = setTimeout(pacmanDying, mTO);
+  }
+  else{
+
+      resetFigure(gameData.pacman);
+      resetFigure(gameData.ghost);
+  }*/
 }
 
 function resetFigure(fig) {
@@ -559,7 +589,7 @@ function initVariables() {
   gameData.score2 = 0;
   gameData.gamePaused = false;
   gameData.gameStarted = false;
-  gameData.lives = 3;
+  gameData.lives = 0;
   initTiles();
 }
 
@@ -651,9 +681,9 @@ function startGame() {
 
   initGame();
   gameData.gameStarted = true;
-  move();
+  pauseGame();
+  //move();
   console.log("Game started");
-  addScoreToDB();
 }
 
 // object constructor
