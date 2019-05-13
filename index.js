@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import './style.css';
-import { database } from "./config";
+import { db, database } from "./config";
+import * as firebase from 'firebase/app'
 
 let Maze;/*= [
   '00000000000000000000',
@@ -83,6 +84,7 @@ let canvasButtons = {
 }
 let backPossible = false;
 let newMapScreen = false;
+let highScoreData = [];
 
 
 
@@ -106,6 +108,42 @@ class Canvas extends React.Component {
         gameData.Maze.push(snap.data().description2);
       }
       );
+    /*let dbRef = db.ref("game_info").doc/data");
+    dbRef.on('value', (snapshot) => {
+      console.log("heya")
+      let scoreData = snapshot.val();
+      let newData = [];
+      for (let val in scoreData) {
+        newData.push({
+          pacManName: scoreData[val].pacManName,
+          score1: scoreData[val].score1,
+          ghostName: scoreData[val].ghostName,
+          score2: scoreData[val].pacManName,
+        });
+      }
+      newData.sort((a, b) => (a.score1 + a.score2 > b.score1 + b.score2) ? 1 : -1)
+      highScoreData = newData;
+      console.log(highScoreData);
+    });*/
+    this.unsubscribe1 = database
+      .collection("game_info")
+      .doc('data').onSnapshot((snapshot) => {
+        console.log("heya")
+        let scoreData = snapshot.data();
+        let newData = [];
+        for (let val in scoreData) {
+          newData.push({
+            pacManName: scoreData[val].pacManName,
+            score1: scoreData[val].score1,
+            ghostName: scoreData[val].ghostName,
+            score2: scoreData[val].pacManName,
+          });
+        }
+        newData.sort((a, b) => (a.score1 + a.score2 > b.score1 + b.score2) ? 1 : -1)
+        highScoreData = newData;
+        console.log(highScoreData);
+      }
+      );
 
     showMenuScreen();
     canvas.onclick = function () { clickEvent(event); };
@@ -118,6 +156,29 @@ class Canvas extends React.Component {
       </div>
     )
   }
+}
+
+function addScoreToDB() {
+  let c = {pacManName: p1Name,
+    score1: gameData.score1,
+    ghostName: p2Name,
+    score2: gameData.score2,
+    mapId: gameData.mazeId,
+    timestamp: new Date(),};
+  database.collection('game_info').doc('data').update({
+  /*  pacManName: p1Name,
+    score1: gameData.score1,
+    ghostName: p2Name,
+    score2: gameData.score2,
+    mapId: gameData.mazeId,
+    timestamp: new Date(),*/
+
+    'highScores': firebase.firestore.FieldValue.arrayUnion(c)
+  }).then(() => {
+    console.log("Data pushed to DB");
+  }).catch((err) => {
+    console.log(err);
+  });
 }
 
 function clickEvent(e) {
@@ -193,7 +254,7 @@ function showChooseMapScreen() {
 }
 
 function showHighScoresScreen() {
-
+  console.log(highScoreData);
   gameData.ctx.fillStyle = 'black';
   gameData.ctx.fillRect(0, 0, cWidth, cHeight);
   let y = 80;
@@ -204,6 +265,9 @@ function showHighScoresScreen() {
   gameData.ctx.fillText("Score", 150, y);
   gameData.ctx.fillText("Ghost", 260, y);
   gameData.ctx.fillText("Score", 350, y);
+
+
+
 }
 
 function showBackBtn(x, y) {
@@ -405,6 +469,10 @@ function checkCollisions() {
       resetFigure(gameData.pacman);
       resetFigure(gameData.ghost);
       gameData.lives -= 1;
+      if (gameData.lives == -1) {
+        addScoreToDB();
+        stopGame();//TODO
+      }
     }
     pauseGame();
     if (pacTimer) clearTimeout(pacTimer);
@@ -418,7 +486,8 @@ function checkCollisions() {
         gameData.pillMaze[i][j] = null;
         gameData.score1 += 10;
         if (allPillsEaten()) {
-          pauseGame();
+          gameData.lives += 1;
+          startNewLevel(); //TODO
         }
         break;
       case 2:
@@ -452,7 +521,7 @@ function figureInMiddle(fig) {
 }
 
 function pacmanDying() {
-  //do animation
+  //do animation TODO
 }
 
 function resetFigure(fig) {
@@ -578,6 +647,7 @@ function startGame() {
   gameData.gameStarted = true;
   move();
   console.log("Game started");
+  addScoreToDB();
 }
 
 // object constructor
