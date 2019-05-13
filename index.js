@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import './style.css';
-import { db, database } from "./config";
+import {database } from "./config";
 import * as firebase from 'firebase/app'
 
 let Maze;
@@ -531,7 +531,7 @@ function stopGame() {
   gameData.ctx.fillText("Game Over !", cWidth / 2 - 100, cHeight / 2 - 75);
 
   gameData.ctx.fillText(p1Name + "'s score : " + gameData.score1, cWidth / 2 - 150, cHeight / 2 - 25);
-  gameData.ctx.fillText(p2Name + "'s score : " + gameData.score1, cWidth / 2 - 150, cHeight / 2 + 25);
+  gameData.ctx.fillText(p2Name + "'s score : " + gameData.score2, cWidth / 2 - 150, cHeight / 2 + 25);
   gameData.ctx.fillText("Click to return tu main menu !", cWidth / 2 - 205, cHeight / 2 + 75);
 }
 

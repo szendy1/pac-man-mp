@@ -1,6 +1,5 @@
 import * as firebase from 'firebase/app';
 import 'firebase/firestore'
-import 'firebase/database'
 const config = {
   apiKey: "AIzaSyBB5VGzlVrbGg2VpG_bsikvf8kjeJ8NrDA",
   authDomain: "pac-man-mp.firebaseapp.com",
@@ -14,5 +13,4 @@ if (!firebase.apps.length) {
   firebase.initializeApp(config)
 }
 
-export const db = firebase.database();
 export const database = firebase.firestore()
