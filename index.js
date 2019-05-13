@@ -38,6 +38,7 @@ let gameData = {
   pacman: null,
   ghost: null,
   score1: 0,
+  newLevelScore: 0,
   score2: 0,
   timer: null,
   pillMaze: null,
@@ -45,6 +46,7 @@ let gameData = {
   lives: 0,
   Maze: [],
   pacDied: false,
+  gameOver: false,
 };
 let canvasButtons = {
   newGameX: cWidth / 2 - 90,
@@ -146,6 +148,12 @@ function addScoreToDB() {
 function clickEvent(e) {
   if (gameData.gameStarted) {
     pauseGame();
+  }
+  else if (gameData.gameOver) {
+    showMenuScreen();
+    gameData.gameOver = false;
+    backPossible = false;
+    newMapScreen = false;
   }
   else {
     let x = e.x - 8;
@@ -444,8 +452,9 @@ function checkCollisions() {
 
     }
     else {
-      gameData.score2 += Math.round(gameData.score1 / 2);
-      gameData.score1 = Math.round(gameData.score1 / 2);
+      gameData.newLevelScore = Math.round(gameData.newLevelScore / 2);
+      gameData.score2 += 100 + gameData.newLevelScore ;
+      gameData.score1 -= gameData.newLevelScore;
       gameData.pacDied = true;
       gameData.pacman.phase = 0;
       pacmanDying();
@@ -455,6 +464,7 @@ function checkCollisions() {
       if (gameData.lives == -1) {
         addScoreToDB();
         stopGame();
+        return true;
       }
     }
     repaintCanvas();
@@ -469,6 +479,7 @@ function checkCollisions() {
       case 1:
         gameData.pillMaze[i][j] = null;
         gameData.score1 += 10;
+        gameData.newLevelScore += 10;
         if (allPillsEaten()) {
           gameData.lives += 1;
           startNewLevel();
@@ -488,7 +499,8 @@ function checkCollisions() {
 function startNewLevel() {
   resetFigure(gameData.pacman);
   resetFigure(gameData.ghost);
-  if (gameData.gameReversed){
+  gameData.newLevelScore = 0;
+  if (gameData.gameReversed) {
     gameData.gameReversed = false;
   }
 
@@ -510,14 +522,17 @@ function startNewLevel() {
 }
 
 function stopGame() {
+  gameData.gameOver = true;
+  gameData.gameStarted = false;
   gameData.ctx.fillStyle = 'black';
   gameData.ctx.fillRect(0, 0, cWidth, cHeight);
   gameData.ctx.font = tile + "px Comic Sans MS";
   gameData.ctx.fillStyle = "white";
-  gameData.ctx.fillText("Game Over !", cWidth / 2 - 100, cHeight / 2 - 25);
+  gameData.ctx.fillText("Game Over !", cWidth / 2 - 100, cHeight / 2 - 75);
 
-  gameData.ctx.fillText(p1Name + "score :"+ gameData.score1, cWidth / 2 - 100, cHeight / 2 - 25);
-  gameData.ctx.fillText("Click to return tu main menu !", cWidth / 2 - 205, cHeight / 2 + 25);
+  gameData.ctx.fillText(p1Name + "'s score : " + gameData.score1, cWidth / 2 - 150, cHeight / 2 - 25);
+  gameData.ctx.fillText(p2Name + "'s score : " + gameData.score1, cWidth / 2 - 150, cHeight / 2 + 25);
+  gameData.ctx.fillText("Click to return tu main menu !", cWidth / 2 - 205, cHeight / 2 + 75);
 }
 
 function allPillsEaten() {
@@ -586,10 +601,11 @@ function initVariables() {
     gameData.pillMaze[i] = new Array(Maze[i].length);
   }
   gameData.score1 = 0;
+  gameData.newLevelScore = 0;
   gameData.score2 = 0;
   gameData.gamePaused = false;
   gameData.gameStarted = false;
-  gameData.lives = 0;
+  gameData.lives = 3;
   initTiles();
 }
 
